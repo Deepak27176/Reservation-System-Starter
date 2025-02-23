@@ -1,33 +1,45 @@
 package flight.reservation.plane;
 
-public class PassengerPlane {
+import java.util.Map;
 
-    public String model;
-    public int passengerCapacity;
-    public int crewCapacity;
+public class PassengerPlane implements Aircraft {
+
+    private  String model;
+    private  int passengerCapacity;
+    private  int crewCapacity;
+     private static final Map<String, int[]> PLANE_MODELS = Map.of(
+        "A380", new int[]{500, 42},
+        "A350", new int[]{320, 40},
+        "Embraer 190", new int[]{25, 5},
+        "Antonov AN2", new int[]{15, 3}
+    );
 
     public PassengerPlane(String model) {
         this.model = model;
-        switch (model) {
-            case "A380":
-                passengerCapacity = 500;
-                crewCapacity = 42;
-                break;
-            case "A350":
-                passengerCapacity = 320;
-                crewCapacity = 40;
-                break;
-            case "Embraer 190":
-                passengerCapacity = 25;
-                crewCapacity = 5;
-                break;
-            case "Antonov AN2":
-                passengerCapacity = 15;
-                crewCapacity = 3;
-                break;
-            default:
-                throw new IllegalArgumentException(String.format("Model type '%s' is not recognized", model));
+        
+        int[] capacities = PLANE_MODELS.get(model);
+
+        if (capacities == null) {
+            throw new IllegalArgumentException(String.format("Model type '%s' is not recognized", model));
+        }
+
+        this.passengerCapacity = capacities[0];
+        this.crewCapacity = capacities[1];
+        }
+        @Override
+        public String getModel() {
+            return model;
+        }
+    
+    
+        public int getPassengerCapacity() {
+            return passengerCapacity;
+        }
+    
+       
+        public int getCrewCapacity() {
+            return crewCapacity;
         }
     }
 
-}
+

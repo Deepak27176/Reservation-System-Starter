@@ -1,19 +1,21 @@
 package flight.reservation;
-
+import flight.reservation.flightfactory.FlightFactory;
 import flight.reservation.flight.Flight;
 import flight.reservation.flight.Schedule;
 import flight.reservation.flight.ScheduledFlight;
-import flight.reservation.plane.Helicopter;
-import flight.reservation.plane.PassengerDrone;
-import flight.reservation.plane.PassengerPlane;
+import flight.reservation.plane.Aircraft;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import flight.reservation.planefactory.HelicopterFactory;
+import flight.reservation.planefactory.PassengerDroneFactory;
+import flight.reservation.planefactory.PassengerPlaneFactory;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -24,10 +26,18 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ScheduleTest {
 
     private Schedule schedule;
+    private HelicopterFactory helicopterFactory;
+    private PassengerDroneFactory passengerDroneFactory;
+    private PassengerPlaneFactory passengerPlaneFactory;
+    private FlightFactory flightFactory;
 
     @BeforeEach
     public void initSchedule() {
         schedule = new Schedule();
+        helicopterFactory = new HelicopterFactory();
+        passengerDroneFactory = new PassengerDroneFactory();
+       passengerPlaneFactory = new PassengerPlaneFactory();
+        flightFactory = new FlightFactory();
     }
 
     @Nested
@@ -55,7 +65,7 @@ public class ScheduleTest {
         @Test
         @DisplayName("then removing a flight should still yield an empty list")
         void thenScheduleShouldYieldEmpty() {
-            schedule.removeFlight(new Flight(1, new Airport("a", "a", "a"), new Airport("b", "b", "b"), new PassengerPlane("A380")));
+            schedule.removeFlight(flightFactory.createFlight(1, new Airport("a", "a", "a"), new Airport("b", "b", "b"), passengerPlaneFactory.createAircraft("A380")));
             assertEquals(0, schedule.getScheduledFlights().size());
         }
 
@@ -71,8 +81,9 @@ public class ScheduleTest {
                 Airport startAirport = new Airport("Berlin Airport", "BER", "Berlin, Berlin");
                 Airport destAirport = new Airport("Frankfurt Airport", "FRA", "Frankfurt, Hesse");
 
-                PassengerPlane aircraft = new PassengerPlane("A380");
-                flight = new Flight(1, startAirport, destAirport, aircraft);
+               // PassengerPlane aircraft = new PassengerPlane("A380");
+                Aircraft aircraft = passengerPlaneFactory.createAircraft("A380");
+                flight = flightFactory.createFlight(1, startAirport, destAirport, aircraft);
                 departure = TestUtil.addDays(Date.from(Instant.now()), 3);
                 schedule.scheduleFlight(flight, departure);
             }
@@ -110,8 +121,16 @@ public class ScheduleTest {
     @Nested
     @DisplayName("Given an existing Schedule")
     class GivenAnExistingSchedule {
+   
 
-        List<Airport> airports = Arrays.asList(
+        List<Airport> airports=new ArrayList<>();
+        List<Flight> flights=new ArrayList<>();
+
+        @BeforeEach
+        public void initSchedule() throws ParseException {
+            
+        // List<Airport> 
+        airports = Arrays.asList(
                 new Airport("Berlin Airport", "BER", "Berlin, Berlin"),
                 new Airport("Frankfurt Airport", "FRA", "Frankfurt, Hesse"),
                 new Airport("Madrid Barajas Airport", "MAD", "Barajas, Madrid"),
@@ -122,17 +141,17 @@ public class ScheduleTest {
                 new Airport("Chengdu Shuangliu International Airport", "CTU", "Shuangliu-Wuhou, Chengdu, Sichuan")
         );
 
-        List<Flight> flights = Arrays.asList(
-                new Flight(1, airports.get(0), airports.get(1), new PassengerPlane("A350")),
-                new Flight(2, airports.get(1), airports.get(2), new PassengerPlane("A380")),
-                new Flight(3, airports.get(2), airports.get(4), new PassengerPlane("Embraer 190")),
-                new Flight(4, airports.get(3), airports.get(2), new PassengerPlane("Antonov AN2")),
-                new Flight(5, airports.get(4), airports.get(2), new Helicopter("H1")),
-                new Flight(6, airports.get(5), airports.get(7), new PassengerDrone("HypaHype"))
+        // List<Flight> 
+        flights = Arrays.asList(
+                flightFactory.createFlight(1, airports.get(0), airports.get(1), passengerPlaneFactory.createAircraft("A350")),
+                flightFactory.createFlight(2, airports.get(1), airports.get(2),passengerPlaneFactory.createAircraft("A380") ),
+                flightFactory.createFlight(3, airports.get(2), airports.get(4),passengerPlaneFactory.createAircraft("Embraer 190") ),
+                flightFactory.createFlight(4, airports.get(3), airports.get(2),passengerPlaneFactory.createAircraft("Antonov AN2")),
+                flightFactory.createFlight(5, airports.get(4), airports.get(2),helicopterFactory.createAircraft("H1") ),
+                flightFactory.createFlight(6, airports.get(5), airports.get(7),passengerDroneFactory.createAircraft("HypaHype"))
         );
 
-        @BeforeEach
-        void initializeSchedule() throws ParseException {
+
             int i = 1;
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
             for (Flight flight : flights) {
