@@ -45,6 +45,7 @@ public class Customer {
             try {
                 return scheduledFlight.getAvailableCapacity() >= passengerNames.size();
             } catch (NoSuchFieldException e) {
+                System.out.println("Error: " + "came here");
                 e.printStackTrace();
                 return false;
             }

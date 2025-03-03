@@ -6,7 +6,10 @@ import flight.reservation.flight.ScheduledFlight;
 import flight.reservation.order.FlightOrder;
 import flight.reservation.payment.CreditCard;
 import flight.reservation.plane.Helicopter;
+import flight.reservation.plane.HelicopterAdapter;
 import flight.reservation.plane.PassengerPlane;
+import flight.reservation.plane.PassengerPlaneAdapter;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -57,7 +60,7 @@ public class ScenarioTest {
             @Test
             @DisplayName("then the flight should not be available")
             void thenFlightNotAvailable() {
-                assertThrows(IllegalArgumentException.class, () -> new Flight(1, startAirport, destinationAirport, new Helicopter("H1")));
+                assertThrows(IllegalArgumentException.class, () -> new Flight(1, startAirport, destinationAirport,new HelicopterAdapter( new Helicopter("H1"))));
             }
 
         }
@@ -70,7 +73,7 @@ public class ScenarioTest {
             public void initFlights() {
                 startAirport = new Airport("John F. Kennedy International Airport", "JFK", "Queens, New York, New York");
                 destinationAirport = new Airport("Frankfurt Airport", "FRA", "Frankfurt, Hesse");
-                flight = new Flight(1, startAirport, destinationAirport, new Helicopter("H1"));
+                flight = new Flight(1, startAirport, destinationAirport, new HelicopterAdapter( new Helicopter("H1")));
                 Date departure = TestUtil.addDays(Date.from(Instant.now()), 3);
                 schedule.scheduleFlight(flight, departure);
             }
@@ -138,7 +141,7 @@ public class ScenarioTest {
             // flights
             startAirport = new Airport("Berlin Airport", "BER", "Berlin, Berlin");
             destinationAirport = new Airport("Frankfurt Airport", "FRA", "Frankfurt, Hesse");
-            flight = new Flight(1, startAirport, destinationAirport, new PassengerPlane("A380"));
+            flight = new Flight(1, startAirport, destinationAirport, new PassengerPlaneAdapter(new PassengerPlane("A380")));
             Date departure = TestUtil.addDays(Date.from(Instant.now()), 3);
             schedule.scheduleFlight(flight, departure);
             // customer
@@ -179,6 +182,7 @@ public class ScenarioTest {
             @DisplayName("then the booking should not be closed/payed")
             void thenTheBookingShouldNotSucceed() {
                 ScheduledFlight scheduledFlight = schedule.searchScheduledFlight(flight.getNumber());
+                System.out.println("I am here:  ##############################################"+scheduledFlight.getCapacity());
                 FlightOrder order = customer.createOrder(Arrays.asList("Max"), Arrays.asList(scheduledFlight), 100);
                 assertThrows(IllegalStateException.class, () -> order.processOrderWithCreditCard(creditCard));
                 assertFalse(order.isClosed());
